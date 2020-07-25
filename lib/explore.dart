@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:travel_agency/constants.dart';
 import 'package:travel_agency/data.dart';
-import 'package:travel_agency/bottom_navigator_item.dart';
+import 'package:travel_agency/detail.dart';
 
 class Explore extends StatefulWidget {
   @override
@@ -10,24 +10,26 @@ class Explore extends StatefulWidget {
 
 class _ExploreState extends State<Explore> {
 
-  List<NavigationItem> navigationItemList = getNavigationItemList();
+  List<NavigationItem> navigationItems = getNavigationItemList();
   NavigationItem selectedItem;
 
   List<Place> places = getPlaceList();
   List<Destination> destinations = getDestinationList();
+  List<Featured> featureds = getFeaturedList();
 
   @override
   void initState() {
     super.initState();
     setState(() {
-      selectedItem = navigationItemList[0];
+      selectedItem = navigationItems[0];
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.red, //kBackgroundColor,
+      backgroundColor: kBackgroundColor,
+      resizeToAvoidBottomPadding: false,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -52,10 +54,11 @@ class _ExploreState extends State<Explore> {
         ],
       ),      
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
 
           Padding(
-            padding: EdgeInsets.all(16),
+            padding: EdgeInsets.only(left: 16, right: 16, top: 16,),
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Search',
@@ -85,19 +88,20 @@ class _ExploreState extends State<Explore> {
             ),
           ),
 
-          Container(
-            height: 350,
-            padding: EdgeInsets.only(top: 16, bottom: 16, left: 16,),
-            child: ListView(
-              physics: BouncingScrollPhysics(),
-              scrollDirection: Axis.horizontal,
-              children: buildPlaces(),
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.only(top: 8, left: 16,),
+              child: ListView(
+                physics: BouncingScrollPhysics(),
+                scrollDirection: Axis.horizontal,
+                children: buildPlaces(),
+              ),
             ),
           ),
 
           Container(
-            height: 150,
-            padding: EdgeInsets.only(top: 16, bottom: 16, left: 16,),
+            height: 120,
+            padding: EdgeInsets.only(top: 8, left: 16,),
             child: ListView(
               physics: BouncingScrollPhysics(),
               scrollDirection: Axis.horizontal,
@@ -105,45 +109,42 @@ class _ExploreState extends State<Explore> {
             ),
           ),
 
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8,),
+            child: Text(
+              "Featured Places",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+
+          Container(
+            height: 90,
+            child: PageView(
+              physics: BouncingScrollPhysics(),
+              children: buildFeatureds(),
+            ),
+          ),
+
         ],
       ),
       bottomNavigationBar: Container(
-        height: 70,
-        margin: EdgeInsets.all(16),
+        height: 60,
+        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8,),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(10),
             topRight: Radius.circular(10),
-            bottomLeft: Radius.circular(35),
-            bottomRight: Radius.circular(35),
+            bottomLeft: Radius.circular(30),
+            bottomRight: Radius.circular(30),
           )
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: navigationItemList.map((item) {
-            return GestureDetector(
-              onTap: () {
-                setState(() {
-                  selectedItem = item;
-                });
-              },
-              child: bottomNavigatorItem(item, selectedItem == item),
-            );
-          }).toList(),
-          /*children: <Widget>[
-
-            bottomNavigatorItem(Icons.home),
-            bottomNavigatorItem(Icons.notifications),
-
-            Container(
-              width: 60,
-            ),
-
-            bottomNavigatorItem(Icons.settings),
-            bottomNavigatorItem(Icons.person),
-
-          ],*/
+          children: buildNavigationItems(),
         ),
       ),
     );
@@ -160,100 +161,103 @@ class _ExploreState extends State<Explore> {
   Widget buildPlace(Place place){
     return GestureDetector(
       onTap: () {
-        /*Navigator.push(
+        Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => Detail(perfume: perfume)),
-        );*/
+          MaterialPageRoute(builder: (context) => Detail(place: place)),
+        );
       },
       child: Card(
-        elevation: 4,
+        elevation: 2,
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(
             Radius.circular(15),
           ),
         ),
-        child: Container(
-          width: 230,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(place.images[0]), 
-              fit: BoxFit.cover,
+        child: Hero(
+          tag: place.images[0],
+          child: Container(
+            width: 230,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(place.images[0]), 
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          child: Stack(
-            children: <Widget>[
+            child: Stack(
+              children: <Widget>[
 
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    place.favorite = !place.favorite;
-                  });
-                },
-                child: Padding(
-                  padding: EdgeInsets.only(left: 12, top: 12,),
-                  child: Align(
-                    alignment: Alignment.topLeft,
-                    child: Icon(
-                      place.favorite ? Icons.favorite : Icons.favorite_border,
-                      color: kPrimaryColor,
-                      size: 36,
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      place.favorite = !place.favorite;
+                    });
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 12, top: 12,),
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Icon(
+                        place.favorite ? Icons.favorite : Icons.favorite_border,
+                        color: kPrimaryColor,
+                        size: 36,
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              Padding(
-                padding: EdgeInsets.only(left: 12, bottom: 12,),
-                child: Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget>[
-                      
-                      Text(
-                        place.description,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                        ),
-                      ),
-
-                      SizedBox(
-                        height: 8,
-                      ),
-
-                      Row(
-                        children: <Widget>[
-                          
-                          Icon(
-                            Icons.location_on,
+                Padding(
+                  padding: EdgeInsets.only(left: 12, bottom: 12, right: 12,),
+                  child: Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        
+                        Text(
+                          place.description,
+                          style: TextStyle(
                             color: Colors.white,
-                            size: 20,
+                            fontSize: 18,
                           ),
+                        ),
 
-                          SizedBox(
-                            width: 8,
-                          ),
+                        SizedBox(
+                          height: 8,
+                        ),
 
-                          Text(
-                            place.country,
-                            style: TextStyle(
+                        Row(
+                          children: <Widget>[
+                            
+                            Icon(
+                              Icons.location_on,
                               color: Colors.white,
-                              fontSize: 14,
+                              size: 20,
                             ),
-                          ),
 
-                        ],
-                      ),
+                            SizedBox(
+                              width: 8,
+                            ),
 
-                    ],
+                            Text(
+                              place.country,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                              ),
+                            ),
+
+                          ],
+                        ),
+
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -270,7 +274,7 @@ class _ExploreState extends State<Explore> {
 
   Widget buildDestination(Destination destination){
     return Card(
-      elevation: 4,
+      elevation: 2,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(
@@ -280,7 +284,7 @@ class _ExploreState extends State<Explore> {
       child: Container(
         width: 140,
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8,),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -320,6 +324,112 @@ class _ExploreState extends State<Explore> {
 
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> buildFeatureds(){
+    List<Widget> list = [];
+    for (var featured in featureds) {
+      list.add(buildFeatured(featured));
+    }
+    return list;
+  }
+
+  Widget buildFeatured(Featured featured){
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 12,),
+      child: Card(
+        elevation: 0,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(15),
+          ),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(featured.imageUrl), 
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16,),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+
+                Text(
+                  featured.year,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+
+                SizedBox(
+                  height: 4,
+                ),
+
+                Text(
+                  featured.title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> buildNavigationItems(){
+    List<Widget> list = [];
+    for (var navigationItem in navigationItems) {
+      list.add(buildNavigationItem(navigationItem));
+    }
+    return list;
+  }
+
+  Widget buildNavigationItem(NavigationItem item){
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedItem = item;
+        });
+      },
+      child: Container(
+        width: 50,
+        child: Stack(
+          children: <Widget>[
+
+            Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                width: 40,
+                height: 3,
+                color: selectedItem == item ? kPrimaryColor : Colors.transparent,
+              ),
+            ),
+
+            Center(
+              child: Icon(
+                item.iconData,
+                color: selectedItem == item ? kPrimaryColor : Colors.grey[400],
+                size: 28,
+              ),
+            )
+
+          ],
         ),
       ),
     );
