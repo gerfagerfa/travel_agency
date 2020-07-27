@@ -41,6 +41,7 @@ class _ExploreState extends State<Explore> {
             color: Colors.black,
           ),
         ),
+        centerTitle: false,
         actions: <Widget>[
 
           Container(

@@ -19,7 +19,7 @@ class _DetailState extends State<Detail> {
   List<Widget> buildPageIndicator(){
     List<Widget> list = [];
     for (var i = 0; i < widget.place.images.length; i++) {
-      list.add(i == _currentImage ? buildIndicator(true) : buildIndicator(false));
+      list.add(buildIndicator(i == _currentImage));
     }
     return list;
   }
