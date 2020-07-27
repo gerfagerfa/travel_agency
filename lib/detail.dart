@@ -55,7 +55,7 @@ class _DetailState extends State<Detail> {
           },
           child: Icon(
             Icons.arrow_back,
-            color: Colors.black,
+            color: Colors.white,
           ),
         ),
         actions: <Widget>[
@@ -64,7 +64,7 @@ class _DetailState extends State<Detail> {
             padding: EdgeInsets.only(right: 16),
             child: Icon(
               Icons.search,
-              color: Colors.black,
+              color: Colors.white,
             ),
           ),
 
@@ -85,11 +85,14 @@ class _DetailState extends State<Detail> {
                     });
                   },
                   children: widget.place.images.map((image) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage(image), 
-                          fit: BoxFit.cover,
+                    return ColorFiltered(
+                      colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.3), BlendMode.darken),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage(image), 
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                     );
